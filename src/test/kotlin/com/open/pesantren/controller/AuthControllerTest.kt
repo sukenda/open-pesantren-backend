@@ -1,5 +1,6 @@
 package com.open.pesantren.controller
 
+import com.open.pesantren.model.TokenRequest
 import com.open.pesantren.model.UserRequest
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -23,6 +24,20 @@ internal class AuthControllerTest(@Autowired val client: WebTestClient) {
                 roles = mutableSetOf("ADMIN"))
 
         client.post().uri("/auth/signup")
+                .bodyValue(userRequest)
+                .accept(MediaType.valueOf(MediaType.APPLICATION_NDJSON_VALUE))
+                .exchange()
+                .expectStatus().isOk
+                .expectBody()
+    }
+
+    @Test
+    fun token() {
+        val userRequest = TokenRequest(
+                username = "admin",
+                password = "admin")
+
+        client.post().uri("/auth/token")
                 .bodyValue(userRequest)
                 .accept(MediaType.valueOf(MediaType.APPLICATION_NDJSON_VALUE))
                 .exchange()

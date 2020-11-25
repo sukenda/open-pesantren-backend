@@ -1,8 +1,6 @@
 package com.open.pesantren.service
 
-import com.open.pesantren.entity.User
-import com.open.pesantren.model.TokenRequest
-import com.open.pesantren.model.UserRequest
+import com.open.pesantren.model.*
 import reactor.core.publisher.Mono
 
 /**
@@ -11,10 +9,14 @@ import reactor.core.publisher.Mono
  **/
 interface UserService {
 
-    fun token(request: TokenRequest): Mono<User>
+    fun token(request: TokenRequest): Mono<TokenResponse>
 
-    fun refreshToken(refreshToken: String): Mono<User>
+    fun refreshToken(refreshToken: String): Mono<TokenResponse>
 
-    fun signup(request: UserRequest): Mono<User>
+    fun signup(request: UserRequest): Mono<UserResponse>
+
+    fun find(profile: String, roles: String, page: Int = 0, size: Int = 20): Mono<RestResponse<List<UserResponse>>>
+
+    fun findById(id: String): Mono<RestResponse<UserResponse>>
 
 }

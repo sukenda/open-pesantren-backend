@@ -10,5 +10,7 @@ data class RestResponse<T>(
 
         val code: Int,
 
-        val data: T
+        val data: T,
+
+        var rows: Int = 0
 )

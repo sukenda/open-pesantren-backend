@@ -1,2 +1,1 @@
-# open-pesantren-backend
-Open pesantren backend project
+# Open Pesantren Backend

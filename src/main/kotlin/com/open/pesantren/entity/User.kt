@@ -1,7 +1,6 @@
 package com.open.pesantren.entity
 
 import org.springframework.data.annotation.Id
-import org.springframework.data.annotation.Transient
 import org.springframework.data.mongodb.core.index.Indexed
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.security.core.GrantedAuthority
@@ -35,7 +34,6 @@ data class User(
 
         var refreshToken: String? = null,
 
-        @Transient
         var accessToken: String? = null,
 
         ) : UserDetails {

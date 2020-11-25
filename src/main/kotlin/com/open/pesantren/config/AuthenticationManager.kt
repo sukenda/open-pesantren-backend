@@ -25,12 +25,11 @@ class AuthenticationManager(val jwtTokenProvider: JWTTokenProvider) : ReactiveAu
                 return Mono.empty()
             }
 
-            /*val claims = jwtTokenProvider.getAllClaimsFromToken(authToken)
-            val roles: MutableList<String> = claims.get("roles", MutableList<String>)*/
-            val roles = listOf("ADMIN", "USER")
+            val claims = jwtTokenProvider.getAllClaimsFromToken(authToken)
+            val roles = claims.get("roles", ArrayList::class.java)
             val authorities: MutableList<GrantedAuthority> = ArrayList()
             for (role in roles) {
-                authorities.add(SimpleGrantedAuthority(role))
+                authorities.add(SimpleGrantedAuthority((role as LinkedHashMap<*, *>)["authority"] as String))
             }
 
             Mono.just(UsernamePasswordAuthenticationToken(username, null, authorities))
