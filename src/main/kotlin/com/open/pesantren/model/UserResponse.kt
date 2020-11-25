@@ -6,7 +6,7 @@ package com.open.pesantren.model
  **/
 data class UserResponse(
 
-        val id: String?,
+        val id: String,
 
         val username: String,
 
@@ -14,9 +14,9 @@ data class UserResponse(
 
         val profile: String,
 
-        val roles: Set<String>?,
+        val roles: Set<String>,
 
-        val active: Boolean = false,
+        val active: Boolean,
 
         val accessToken: String? = null
 

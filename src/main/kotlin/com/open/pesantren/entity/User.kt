@@ -16,38 +16,36 @@ import java.util.stream.Collectors
 data class User(
 
         @Id
-        val id: String? = null,
+        val id: String,
 
         @Indexed(unique = true)
-        var email: String? = null,
+        var email: String,
 
         @Indexed(unique = true)
-        var name: String? = null,
+        var name: String,
 
-        var pass: String? = null,
+        var pass: String,
 
-        var enabled: Boolean? = null,
+        var enabled: Boolean,
 
-        var profile: String? = null,
+        var profile: String,
 
-        var roles: Set<String>? = null,
+        var roles: Set<String>,
 
-        var refreshToken: String? = null,
-
-        var accessToken: String? = null,
+        var refreshToken: String,
 
         ) : UserDetails {
 
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
-        return roles!!.stream().map { role: String? -> SimpleGrantedAuthority(role) }.collect(Collectors.toList())
+        return roles.stream().map { role: String -> SimpleGrantedAuthority(role) }.collect(Collectors.toList())
     }
 
     override fun getPassword(): String {
-        return pass!!
+        return pass
     }
 
     override fun getUsername(): String {
-        return name!!
+        return name
     }
 
     override fun isAccountNonExpired(): Boolean {
@@ -63,6 +61,6 @@ data class User(
     }
 
     override fun isEnabled(): Boolean {
-        return enabled!!
+        return enabled
     }
 }

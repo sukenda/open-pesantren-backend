@@ -17,10 +17,10 @@ internal class AuthControllerTest(@Autowired val client: WebTestClient) {
     @Test
     fun register() {
         val userRequest = UserRequest(
-                username = "admin",
-                password = "admin",
-                email = "admin@gmail.com",
-                profile = "Admin Profile",
+                username = "Kenda",
+                password = "Kenda",
+                email = "Kenda@gmail.com",
+                profile = "Kenda Profile",
                 roles = mutableSetOf("ADMIN"))
 
         client.post().uri("/auth/signup")
@@ -34,8 +34,8 @@ internal class AuthControllerTest(@Autowired val client: WebTestClient) {
     @Test
     fun token() {
         val userRequest = TokenRequest(
-                username = "admin",
-                password = "admin")
+                username = "Kenda",
+                password = "Kenda")
 
         client.post().uri("/auth/token")
                 .bodyValue(userRequest)
@@ -43,6 +43,8 @@ internal class AuthControllerTest(@Autowired val client: WebTestClient) {
                 .exchange()
                 .expectStatus().isOk
                 .expectBody()
+                .jsonPath("$.accessToken").isNotEmpty
+                .jsonPath("$.refreshToken").isNotEmpty
     }
 
 }

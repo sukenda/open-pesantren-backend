@@ -1,5 +1,6 @@
 package com.open.pesantren.controller
 
+import com.open.pesantren.entity.User
 import com.open.pesantren.model.*
 import com.open.pesantren.service.UserService
 import io.swagger.v3.oas.annotations.tags.Tag
