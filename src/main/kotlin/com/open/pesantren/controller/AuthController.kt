@@ -5,6 +5,7 @@ import com.open.pesantren.service.UserService
 import io.swagger.v3.oas.annotations.security.SecurityRequirements
 import io.swagger.v3.oas.annotations.tags.Tag
 import lombok.RequiredArgsConstructor
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -36,8 +37,14 @@ class AuthController(val userService: UserService) {
 
     @SecurityRequirements
     @PostMapping(value = ["/signup"], produces = [MediaType.APPLICATION_NDJSON_VALUE])
-    fun signup(@RequestBody request: UserRequest): Mono<UserResponse> {
-        return userService.signup(request)
+    fun signup(@RequestBody request: UserRequest): Mono<RestResponse<UserResponse>> {
+        return userService.signup(request).flatMap {
+            Mono.just(RestResponse(
+                    status = HttpStatus.CREATED.name,
+                    code = HttpStatus.CREATED.value(),
+                    data = it)
+            )
+        }
     }
 
 }

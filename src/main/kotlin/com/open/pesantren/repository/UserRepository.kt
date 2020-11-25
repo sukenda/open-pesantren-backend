@@ -16,6 +16,4 @@ interface UserRepository : ReactiveMongoRepository<User, String> {
 
     fun findByProfileContainingAndRolesContaining(profile: String, roles: String, pageable: Pageable): Flux<User>
 
-    fun existsByName(name: String): Mono<Boolean>
-
 }

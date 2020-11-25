@@ -1,0 +1,11 @@
+GET http://localhost:8080/users/447e6c21-6583-4938-8b5f-728d13354c46
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJjcmVhdGVkIjoxNjA2Mjg2NDQyNzczLCJyb2xlcyI6WyJBRE1JTiJdLCJ1c2VybmFtZSI6IktlbmRhIiwic3ViIjoiS2VuZGEiLCJpYXQiOjE2MDYyODY0NDIsImV4cCI6MTYwNjMxNTI0Mn0.CqanTqnd6eVG1eSLcTDZpWiHwaRVcQl6R2FRR1LfxNgLrBIS7CJRmZSST1DtJ7eKoT3oP37l2M0tLdKIzAN61g
+
+###
+
+GET http://localhost:8080/users?page=0&size=10
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJjcmVhdGVkIjoxNjA2Mjg2NDQyNzczLCJyb2xlcyI6WyJBRE1JTiJdLCJ1c2VybmFtZSI6IktlbmRhIiwic3ViIjoiS2VuZGEiLCJpYXQiOjE2MDYyODY0NDIsImV4cCI6MTYwNjMxNTI0Mn0.CqanTqnd6eVG1eSLcTDZpWiHwaRVcQl6R2FRR1LfxNgLrBIS7CJRmZSST1DtJ7eKoT3oP37l2M0tLdKIzAN61g
+
+###

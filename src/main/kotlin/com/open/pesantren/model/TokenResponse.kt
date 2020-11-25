@@ -10,5 +10,8 @@ data class TokenResponse(
 
         val refreshToken: String,
 
-        val type: String = "Bearer",
+        val expiration: Long,
+
+        val type: String = "Bearer"
+
 )

@@ -31,8 +31,8 @@ class SecurityConfiguration(val authenticationManager: AuthenticationManager,
     fun securityWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain? {
         return http
                 .exceptionHandling()
-                .authenticationEntryPoint { swe: ServerWebExchange, _: AuthenticationException? -> Mono.fromRunnable { swe.response.statusCode = HttpStatus.UNAUTHORIZED } }
-                .accessDeniedHandler { swe: ServerWebExchange, _: AccessDeniedException? -> Mono.fromRunnable { swe.response.statusCode = HttpStatus.FORBIDDEN } }.and()
+                .authenticationEntryPoint { swe: ServerWebExchange, _: AuthenticationException -> Mono.fromRunnable { swe.response.statusCode = HttpStatus.UNAUTHORIZED } }
+                .accessDeniedHandler { swe: ServerWebExchange, _: AccessDeniedException -> Mono.fromRunnable { swe.response.statusCode = HttpStatus.FORBIDDEN } }.and()
                 .csrf().disable()
                 .formLogin().disable()
                 .httpBasic().disable()
@@ -56,7 +56,7 @@ class SecurityConfiguration(val authenticationManager: AuthenticationManager,
 
     @Bean
     fun passwordEncoder(): PasswordEncoder? {
-        return BCryptPasswordEncoder()
+        return BCryptPasswordEncoder(12)
     }
 
     @Bean

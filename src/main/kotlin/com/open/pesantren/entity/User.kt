@@ -16,7 +16,7 @@ import java.util.stream.Collectors
 data class User(
 
         @Id
-        val id: String,
+        var id: String?,
 
         @Indexed(unique = true)
         var email: String,
@@ -32,7 +32,7 @@ data class User(
 
         var roles: Set<String>,
 
-        var refreshToken: String,
+        var refreshToken: String?,
 
         ) : UserDetails {
 

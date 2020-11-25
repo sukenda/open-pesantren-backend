@@ -1,6 +1,5 @@
 package com.open.pesantren.config
 
-import com.open.pesantren.entity.User
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
@@ -45,7 +44,7 @@ class JWTTokenProvider : Serializable {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).body
     }
 
-    fun getUsernameFromToken(token: String): String? {
+    fun getUsernameFromToken(token: String): String {
         return getAllClaimsFromToken(token).subject
     }
 

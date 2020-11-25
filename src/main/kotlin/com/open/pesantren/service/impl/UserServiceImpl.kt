@@ -3,13 +3,15 @@ package com.open.pesantren.service.impl
 import com.open.pesantren.config.JWTTokenProvider
 import com.open.pesantren.entity.User
 import com.open.pesantren.exception.DataNotFoundException
-import com.open.pesantren.exception.UserException
+import com.open.pesantren.exception.InvalidUserPasswordException
+import com.open.pesantren.exception.UserExistException
 import com.open.pesantren.model.*
 import com.open.pesantren.repository.UserRepository
 import com.open.pesantren.service.UserService
 import com.open.pesantren.validation.ValidationUtil
 import lombok.extern.slf4j.Slf4j
 import org.springframework.data.domain.PageRequest
+import org.springframework.http.HttpStatus
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -42,19 +44,24 @@ class UserServiceImpl(val tokenProvider: JWTTokenProvider,
         validationService.validate(request)
 
         return userRepository.findByName(request.username)
-                .switchIfEmpty(Mono.error(UserException("Pastikan username dan password anda benar")))
+                .switchIfEmpty(Mono.error(InvalidUserPasswordException("Pastikan username dan password anda benar")))
                 .flatMap { user ->
                     if (passwordEncoder.matches(request.password, user.password)) {
 
-                        val refreshToken = tokenProvider.generateToken(user.username, user.roles, true)
-                        val accessToken = tokenProvider.generateToken(user.username, user.roles, false)
+                        val refresh = tokenProvider.generateToken(user.username, user.roles, true)
+                        val token = tokenProvider.generateToken(user.username, user.roles, false)
 
-                        user.refreshToken = refreshToken
+                        user.refreshToken = refresh
                         return@flatMap userRepository.save(user)
-                                .flatMap { Mono.just(TokenResponse(accessToken = accessToken, refreshToken = refreshToken)) }
+                                .flatMap {
+                                    Mono.just(TokenResponse(
+                                            accessToken = token,
+                                            refreshToken = refresh,
+                                            expiration = tokenProvider.getExpirationDateFromToken(token).time))
+                                }
                     }
 
-                    Mono.error(UserException("Pastikan username dan password anda benar"))
+                    Mono.error(InvalidUserPasswordException("Pastikan username dan password anda benar"))
                 }
     }
 
@@ -62,7 +69,7 @@ class UserServiceImpl(val tokenProvider: JWTTokenProvider,
         validationService.validate(refreshToken)
 
         return userRepository.findByRefreshToken(refreshToken)
-                .switchIfEmpty(Mono.error(UserException("Pastikan refresh token yang anda kirim benar")))
+                .switchIfEmpty(Mono.error(InvalidUserPasswordException("Pastikan refresh token yang anda kirim benar")))
                 .flatMap { user ->
 
                     val refresh = tokenProvider.generateToken(user.username, user.roles, true)
@@ -70,7 +77,10 @@ class UserServiceImpl(val tokenProvider: JWTTokenProvider,
 
                     user.refreshToken = refresh
                     userRepository.save(user).flatMap {
-                        Mono.just(TokenResponse(accessToken = token, refreshToken = refresh))
+                        Mono.just(TokenResponse(
+                                accessToken = token,
+                                refreshToken = refresh,
+                                expiration = tokenProvider.getExpirationDateFromToken(token).time))
                     }
                 }
     }
@@ -78,36 +88,35 @@ class UserServiceImpl(val tokenProvider: JWTTokenProvider,
     override fun signup(request: UserRequest): Mono<UserResponse> {
         validationService.validate(request)
 
-        return userRepository.existsByName(request.username!!)
+        val newUser = User(
+                id = null,
+                refreshToken = null,
+                name = request.username!!,
+                pass = passwordEncoder.encode(request.password),
+                email = request.email!!,
+                profile = request.profile!!,
+                roles = request.roles!!,
+                enabled = true
+        )
+
+        return userRepository.findByName(request.username)
+                .defaultIfEmpty(newUser)
                 .flatMap { current ->
-                    if (current) {
-                        return@flatMap Mono.error(UserException("Username sudah ada, silahkan gunakan username lain"))
+                    if (current.id != null) {
+                        Mono.error(UserExistException("Username sudah ada, silahkan gunakan username lain"))
+
+                    } else {
+                        val refresh: String = tokenProvider.generateToken(request.username, request.roles, true)
+
+                        newUser.id = UUID.randomUUID().toString()
+                        newUser.refreshToken = refresh
+
+                        userRepository.save(newUser)
+                                .flatMap {
+                                    Mono.just(userToResponse(it))
+                                }
                     }
-
-                    val refresh: String = tokenProvider.generateToken(request.username, request.roles!!, true)
-                    val user = User(
-                            id = UUID.randomUUID().toString(),
-                            name = request.username,
-                            pass = passwordEncoder.encode(request.password),
-                            email = request.email!!,
-                            profile = request.profile!!,
-                            enabled = true,
-                            roles = request.roles,
-                            refreshToken = refresh
-                    )
-
-                    userRepository.save(user)
-                            .flatMap {
-                                Mono.just(UserResponse(
-                                        id = it.id,
-                                        username = it.username,
-                                        active = it.enabled,
-                                        roles = it.roles,
-                                        email = it.email,
-                                        profile = it.profile))
-                            }
                 }
-
     }
 
     override fun find(profile: String, roles: String, page: Int, size: Int): Mono<RestResponse<List<UserResponse>>> {
@@ -119,23 +128,38 @@ class UserServiceImpl(val tokenProvider: JWTTokenProvider,
                 .collectList()
                 .map { users ->
                     RestResponse(
-                            status = "OK",
-                            code = 200,
+                            status = HttpStatus.OK.name,
+                            code = HttpStatus.OK.value(),
                             rows = count,
-                            data = users.map { UserResponse(it.id, it.username, it.email, it.profile, it.roles, it.enabled) }
+                            data = users.map { userToResponse(it) }
                     )
                 }
     }
 
-    override fun findById(id: String): Mono<RestResponse<UserResponse>> {
+    override fun findById(id: String): Mono<UserResponse> {
         return findByIdOrThrow(id)
                 .flatMap {
-                    Mono.just(RestResponse(
-                            rows = 1,
-                            status = "OK",
-                            code = 200,
-                            data = UserResponse(it.id, it.name, it.email, it.profile, it.roles, it.enabled)
-                    ))
+                    Mono.just(userToResponse(it))
+                }
+    }
+
+    override fun disable(id: String): Mono<UserResponse> {
+        return findByIdOrThrow(id)
+                .flatMap { it ->
+
+                    it.enabled = false
+                    userRepository.save(it)
+                            .flatMap { Mono.just(userToResponse(it)) }
+                }
+    }
+
+    override fun updateRole(id: String, roles: MutableSet<String>): Mono<UserResponse> {
+        return findByIdOrThrow(id)
+                .flatMap { it ->
+
+                    it.roles = roles
+                    userRepository.save(it)
+                            .flatMap { Mono.just(userToResponse(it)) }
                 }
     }
 
@@ -144,4 +168,9 @@ class UserServiceImpl(val tokenProvider: JWTTokenProvider,
                 .switchIfEmpty(Mono.error(DataNotFoundException("Data tidak ditemukan")))
                 .flatMap { Mono.just(it) }
     }
+
+    fun userToResponse(user: User): UserResponse {
+        return UserResponse(user.id!!, user.name, user.email, user.profile, user.roles, user.enabled)
+    }
+
 }

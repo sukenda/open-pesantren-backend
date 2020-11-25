@@ -1,10 +1,10 @@
 package com.open.pesantren.controller
 
-import com.open.pesantren.entity.User
 import com.open.pesantren.model.*
 import com.open.pesantren.service.UserService
 import io.swagger.v3.oas.annotations.tags.Tag
 import lombok.RequiredArgsConstructor
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
@@ -30,7 +30,13 @@ class UserController(val userService: UserService) {
 
     @GetMapping(value = ["/{id}"], produces = [MediaType.APPLICATION_NDJSON_VALUE])
     fun findById(@PathVariable("id") id: String): Mono<RestResponse<UserResponse>> {
-        return userService.findById(id)
+        return userService.findById(id).flatMap {
+            Mono.just(RestResponse(
+                    status = HttpStatus.OK.name,
+                    code = HttpStatus.OK.value(),
+                    data = it)
+            )
+        }
     }
 
 }

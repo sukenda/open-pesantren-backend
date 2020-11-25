@@ -17,6 +17,10 @@ interface UserService {
 
     fun find(profile: String, roles: String, page: Int = 0, size: Int = 20): Mono<RestResponse<List<UserResponse>>>
 
-    fun findById(id: String): Mono<RestResponse<UserResponse>>
+    fun findById(id: String): Mono<UserResponse>
+
+    fun disable(id: String): Mono<UserResponse>
+
+    fun updateRole(id: String, roles: MutableSet<String>): Mono<UserResponse>
 
 }

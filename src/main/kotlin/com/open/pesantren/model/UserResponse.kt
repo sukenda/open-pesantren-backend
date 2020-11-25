@@ -16,8 +16,6 @@ data class UserResponse(
 
         val roles: Set<String>,
 
-        val active: Boolean,
-
-        val accessToken: String? = null
+        val active: Boolean
 
 )
