@@ -34,6 +34,8 @@ data class User(
 
         var refreshToken: String?,
 
+        var image: String?,
+
         ) : UserDetails {
 
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> {

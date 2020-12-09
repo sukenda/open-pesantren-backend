@@ -91,6 +91,7 @@ class UserServiceImpl(val tokenProvider: JWTTokenProvider,
         val newUser = User(
                 id = null,
                 refreshToken = null,
+                image = null,
                 name = request.username!!,
                 pass = passwordEncoder.encode(request.password),
                 email = request.email!!,

@@ -8,7 +8,6 @@ import java.time.LocalDateTime
  * Created by Kenda on 24 Nov 2020
  * Email soekenda09@gmail.com
  **/
-
 @Document
 data class BaseEntity(
 
