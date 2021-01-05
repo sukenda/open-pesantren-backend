@@ -14,6 +14,11 @@
       "name": "jwt.refresh.expiration",
       "type": "java.lang.String",
       "description": "Time for valid refresh token."
+    },
+    {
+      "name": "file.path.upload",
+      "type": "java.lang.String",
+      "description": "Folder when upload file."
     }
   ]
 }

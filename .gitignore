@@ -16,3 +16,4 @@ out/
 ###
 docker-compose/mongodb
 logs
+files

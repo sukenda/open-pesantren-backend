@@ -50,4 +50,6 @@ data class Pendaftar(
 
     private val namaKIP: String,
 
+    private val berkas: Set<Berkas>?,
+
     )
